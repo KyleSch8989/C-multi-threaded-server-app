@@ -27,7 +27,7 @@ struct Stats {
     int encryptionRequests;
 };
 
-struct Params { //REF: inspiration taken from LEC8
+struct Params { 
     int fd;
     char** dictStr;
     int dictLen;
@@ -82,6 +82,12 @@ char** split_by_char(char* str, char split, unsigned int maxFields) {
 	int count = 0;
 	char* token = strtok(str, &split);
 	while (token != NULL && count < maxFields) {
+
+		char* newline_pos = strchr(token, '\n');
+		if (newline_pos != NULL) {
+			*newline_pos = '\0';
+		}
+
 		result[count] = malloc((strlen(token) + 1) * sizeof(char));
 		if (result[count] == NULL){
 			fprintf(stderr, "Mem allocation error");
@@ -96,7 +102,6 @@ char** split_by_char(char* str, char split, unsigned int maxFields) {
 		result[count] = NULL;
 		count++;
 	}
-
 	return result;
 }
 
@@ -117,7 +122,6 @@ char* read_line(FILE* stream) {
 	if (line[characters - 1] == '\n') {
 		line[characters - 1] = '\0';
 	}
-
 	return line;
 }
 
@@ -192,8 +196,6 @@ void command_line_validity(int argc, char* argv[]) {
  *      the data structure is of the type char**.
  * Errors: If the dictionary is empty, then the program will exit with
  *      exit code 3.
- * REF: Inspiration for dictionary filtering taken from 
- * REF: Ed Lession Week 3.2 - file handling/Custom input processing.
  */
 char** filter_dict(FILE* dictStream) {
     char* line;
@@ -358,11 +360,8 @@ char** get_dict(int argc, char* argv[]) {
  * Errors: If there are any errors regarding the socket such as setting the
  *      options or binding the socket, the program will exit with error 
  *      code 4.
- * REF: Following function heavily inspired from example given on moss at
- * REF: week10/server-multithreaded.c
  */
 int begin_listen(int port, int connLimit) {
-    //REF: Inspiration taken from week10/server-multithreaded
     char strPort[6]; //integer version of port is already < 6 characters long.
     sprintf(strPort, "%d", port);
 
@@ -405,10 +404,8 @@ int begin_listen(int port, int connLimit) {
  * listenFd: listening socket file descriptor.
  * Errors: If there is an error when trying to recive the port number the
  *      program will exit with error code 4.
- * REF: Heavy inpiration for function taken from week10/net4.c
  */
 void port_num(int listenFd) {
-    //REF: instiration taken from week10/net4.c
     struct sockaddr_in ad;
     memset(&ad, 0, sizeof(struct sockaddr_in));
     socklen_t len = sizeof(struct sockaddr_in);
@@ -439,7 +436,6 @@ void port_num(int listenFd) {
  *      cyphertext being tested and the specific range of indexes for this
  *      thread.
  * 
- * REF: usage of crypt_r() taken from 'man crypt(3)'
  */
 void* crack_thread(void* params) {
     struct Params* p = (struct Params*)params;
@@ -477,17 +473,18 @@ void* crack_thread(void* params) {
  * clientFd: file descriptor for the current client.
  * plaintext: plaintext to be encrypted.
  * salt: additional salt to be used as the setting for the encryption.
- * REF: use of crypt_r() taken from 'man crypt(3)'
  */
 void server_crypt(int clientFd, char* plaintext, char* salt, 
         struct Params* p) {
     struct crypt_data cd;
     memset(&cd, 0, sizeof(cd));
     cd.initialized = 0;
-    crypt_r(plaintext, salt, &cd);
+
+    char* out = crypt_r(plaintext, salt, &cd);
 
     char* cypherLn = strdup("");
-    sprintf(cypherLn, "%s\n", cd.output);
+	sprintf(cypherLn, "%s\n", out);
+
     write(clientFd, cypherLn, 14);
 }
 
@@ -501,7 +498,6 @@ void server_crypt(int clientFd, char* plaintext, char* salt,
  * numThreads: number of threads requested to be used during the brute-force.
  * params: large struct containing dictionary and its length in terms of
  *      a word count.
- * REF: slight inspiration taken from week8/thread4.c
  */
 void server_crack(int clientFd, char* cyphertext, int numThreads, 
         struct Params* p) {
@@ -568,10 +564,8 @@ void server_crack(int clientFd, char* cyphertext, int numThreads,
  * command: command given by the client.
  * p: large struct containing data to be used in the cracking process.
  *
- * REF: use of write command taken from 'man write(3)'
  */
 void process_command(int clientFd, char* command, struct Params* p) {
-    //REF: use of split_by_char inspired by man page split_by_char(3)
     char** fields = split_by_char(command, ' ', 3);
     if (strcmp(fields[0], "crack") && strcmp(fields[0], "crypt")) {
         write(clientFd, ":invalid\n", 9);
@@ -620,7 +614,7 @@ void process_command(int clientFd, char* command, struct Params* p) {
         sem_wait(p->s.statsLock);
         p->s.cryptRequests += 1;
         sem_post(p->s.statsLock);
-        if ((strlen(fields[2]) - 1) != 2) {
+        if (strlen(fields[2]) != 2) {
             write(clientFd, ":invalid\n", 9);
             return;
         }
@@ -649,10 +643,7 @@ void process_command(int clientFd, char* command, struct Params* p) {
  *
  * v: large struct used to send many arguments into threads.
  *
- * REF: use of read command inspired by week10/server-multithreaded.c and
- * REF: 'man read(3)'
  *
- * REF: example of multi-argument thread function taken from Lec 8/Page 33-35.
  */
 void* client_thread(void* v) {
     struct Params* p = (struct Params*)v;
@@ -702,7 +693,6 @@ void* client_thread(void* v) {
  *
  * args: large struct that is shared across all client threads.
  *
- * REF: Usage of sigwait() taken from 'man pthead_sigmask(3)'.
  */
 void* stats_thread(void* args) {
     struct Params* p = (struct Params*)args;
@@ -733,8 +723,6 @@ void* stats_thread(void* args) {
  * p: large struct that is shared across all threads. Used to store the stats
  *      struct inside of.
  *
- * REF: Usage of pthread_sigmask taken from example shown 
- * REF: on 'man pthread_sigmask(3)'.
  */
 void stats_init(struct Params* p) {   
     sigemptyset(&(p->s.set));
@@ -766,10 +754,7 @@ void stats_init(struct Params* p) {
  * connLimit: user defined limit to the simultaneous amount of clients
  *      connected. if the limit is 0 then there is no limit.
  * 
- * REF: Heavy inspiration for accepting client connections and thread creation
- * REF: from week10/server-multithreaded.c
  *
- * REF: usage of a multi-argument thread function taken from Lec 8/Page 33-35.
  */
 void process_connections(int serverFd, char** dict, int connLimit) {
     int dictLen = 0;
@@ -838,8 +823,6 @@ void process_connections(int serverFd, char** dict, int connLimit) {
  *
  * Returns: 0 if the program runs sucsessfully.
  *
- * REF: Usage for all semaphores throughout the server taken from 
- * REF: week8/race3.c
  */
 int main(int argc, char* argv[]) {
     command_line_validity(argc, argv);

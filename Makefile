@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -pedantic -Wall -g -pthread -lcrypt
+CFLAGS = -pedantic -Wall -g -pthread
 
 OUTPUTCLIENT = crackclient
 OUTPUTSERVER = crackserver
@@ -8,10 +8,10 @@ all: cc cs
 .DEFAULT: all
 
 cc : crackclient.c
-	$(CC) $(CFLAGS) crackclient.c -o $(OUTPUTCLIENT)
+	$(CC) $(CFLAGS) crackclient.c -o $(OUTPUTCLIENT) -lcrypt
 
 cs : crackserver.c
-	$(CC) $(CFLAGS) crackserver.c -o $(OUTPUTSERVER)
+	$(CC) $(CFLAGS) crackserver.c -o $(OUTPUTSERVER) -lcrypt
 
 cleanc : 
 	rm crackclient

@@ -90,7 +90,6 @@ char* read_line(FILE* stream) {
  * Returns: file descriptor of the opened socket.
  * Errors: If the client cannot connect to the server using the given port
  *      the client program will exit with error code 3.
- * REF: Heavy inspiration for use of client connection taken from week10/net2.c
  */
 int connection(const char* port) {
     struct addrinfo* ai = 0;
