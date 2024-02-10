@@ -12,7 +12,9 @@ Communication between CrackClient and CrackServer is established over TCP using 
   
 **TCP Communication:** Communication between the client and server is facilitated over TCP, ensuring robustness and reliability.  
   
-**Advanced Functionality:** The server incorporates advanced features such as connection limiting, signal handling, and statistics reporting for enhanced usability and performance.  
+**Advanced Functionality:** The server incorporates advanced features such as connection limiting, signal handling, and statistics reporting for enhanced usability and performance.
+
+**Thread safe functionality:** The server makes use of thread safe functions and incorporates the use of semaphores and mutexes.
 
 ## Usage:
 1. **Start the server:** Run the '**crackserver**' program to initiate the server.  
