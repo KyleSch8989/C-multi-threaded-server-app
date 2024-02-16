@@ -18,15 +18,20 @@ Communication between CrackClient and CrackServer is established over TCP using 
 
 ## Usage:
 1. **Start the server:** Run the '**crackserver**' program to initiate the server.  
-   Commandline args: ./crackserver [--maxconn connections] [--port portnum] [--dictionary filename]
+   Commandline args: `./crackserver [--maxconn connections] [--port portnum] [--dictionary filename]`
      - connections: max number of client connections. No maximum by default.
      - portnum: port number for connection as ip is set as localhost. Random number >5000 by default.
-     - filename: a path to a file containing all valid words. /usr/share/dict/words by defualt.
+     - filename: a path to a file containing all valid words. `/usr/share/dict/words` by defualt.
 3. **Connect as a client:** Run the '**crackclient**' program with the specific commandline args to connect to the right server.
-   Commandline args: ./crackclient portnum [inputfile]
+   Commandline args: `./crackclient portnum [inputfile]`
 4. Once connected to the server, the client can either choose to send 'crypt' or 'crack' requests to the server in the following form:  
-  crypt: 'crypt "plaintext" "salt"'  
-  crack: 'crack "cyphertext" [number of requested threads for bruteforce cracking]'
+```
+crypt:
+crypt "plaintext" "salt"  
+
+crack:
+crack "cyphertext" [number of requested threads for bruteforce cracking]
+```
 
 ## Getting started: LINUX
 To get started on your own please follow the steps provided.
