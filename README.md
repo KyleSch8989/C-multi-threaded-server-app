@@ -17,6 +17,12 @@ Communication between CrackClient and CrackServer is established over TCP using 
 **Thread safe functionality:** The server makes use of thread safe functions and incorporates the use of semaphores and mutexes.
 
 ## Usage:
+### Building:
+1. **Make the executables:** Use the follownig command in the program directory to compile and make the files.
+```
+make
+```
+### Run the server:  
 1. **Start the server:** Run the '**crackserver**' program to initiate the server.  
    Commandline args: `./crackserver [--maxconn connections] [--port portnum] [--dictionary filename]`
      - connections: max number of client connections. No maximum by default.
